@@ -7,27 +7,30 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Query to fetch student information with joined section and course data
 $query_students = mysqli_query($conn, "
     SELECT s.id, s.first_name, s.last_name, s.email, s.gender, s.year, 
-           COALESCE(sec.section_name, 'N/A') AS section_name, 
-           COALESCE(c.course_name, 'N/A') AS course_name
+       COALESCE(sec.section_name, 'N/A') AS section_name, 
+       COALESCE(c.course_name, 'N/A') AS course_name
     FROM students s
-    JOIN sections sec ON s.section_id = sec.id
-    JOIN courses c ON s.course_id = c.id
+    LEFT JOIN sections sec ON s.section_id = sec.id  
+    LEFT JOIN courses c ON s.course_id = c.id        
 ") or die("Error fetching student information: " . mysqli_error($conn));
 
+// Query to fetch instructor information where role is 'instructor'
 $query_instructors = mysqli_query($conn, "
     SELECT u.id, u.username, u.department, u.email
     FROM users u
     WHERE u.role = 'instructor'
 ") or die("Error fetching instructor information: " . mysqli_error($conn));
 
-// New queries to fetch courses and sections
+// Query to fetch all course data
 $query_courses = mysqli_query($conn, "
     SELECT c.id, c.course_name, c.course_department, c.course_code
     FROM courses c
 ") or die("Error fetching course information: " . mysqli_error($conn));
 
+// Query to fetch all section data
 $query_sections = mysqli_query($conn, "
     SELECT * FROM sections
 ") or die("Error fetching section information: " . mysqli_error($conn));
